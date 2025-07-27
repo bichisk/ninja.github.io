@@ -118,9 +118,17 @@
 
   <img id="ninja" src="ninja.png" alt="忍者" />
   <img id="enemy" src="enemy.png" alt="敵" />
+  
+  <!-- 正解/不正解画像 -->
+  <img class="ninja-pose" id="pose1" src="ninja_pose1.png" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:200px; z-index:100;" />
+  <img class="ninja-pose" id="pose2" src="ninja_pose2.png" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:200px; z-index:100;" />
+  <img class="ninja-pose" id="pose3" src="ninja_pose3.png" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:200px; z-index:100;" />
   <img id="fail-image" src="fail.png" alt="不正解画像" />
-  <img id="ninja-pose" src="ninja_pose.png" alt="忍者決めポーズ" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; z-index: 100;" />
 
+
+  <!-- clear/fail -->
+  <img id="clear-image" src="clear.png" alt="クリア" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 100;" />
+  <img id="fail-clear-image" src="fail_clear.png" alt="クリア失敗" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 100;" />
 
   <!-- BGMと効果音 -->
   <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
@@ -146,35 +154,28 @@
     let countdown = 5;
     let answered = false;
 
-    // window.onload = () => {
-    // // BGMを自動再生（ユーザー操作後でないとブラウザ制限ある場合あり）
-    // const bgm = document.getElementById('bgm');
-    // bgm.volume = 0.3;
-    // bgm.play().catch(() => {
-    //     // 自動再生失敗時は何もしない（ユーザー操作待ち）
-    // });
+    let wrongCount = 0;
+    let gameEnded = false;
 
-    // generateQuestion();
-    // };
-window.onload = () => {
-  const startBtn = document.getElementById('start-btn');
-  const bgm = document.getElementById('bgm');
 
-  startBtn.addEventListener('click', () => {
-    // BGM再生（音量調整可）
-    bgm.volume = 0.3;
-    bgm.play().catch((e) => {
-      console.log("BGM再生に失敗しました:", e);
+    window.onload = () => {
+    const startBtn = document.getElementById('start-btn');
+    const bgm = document.getElementById('bgm');
+
+    startBtn.addEventListener('click', () => {
+        // BGM再生（音量調整可）
+        bgm.volume = 0.3;
+        bgm.play().catch((e) => {
+        console.log("BGM再生に失敗しました:", e);
+        });
+
+        // ボタンを非表示にする
+        startBtn.style.display = 'none';
+
+        // ゲーム開始
+        generateQuestion();
     });
-
-    // ボタンを非表示にする
-    startBtn.style.display = 'none';
-
-    // ゲーム開始
-    generateQuestion();
-  });
-};
-
+    };
 
 
     function generateQuestion() {
@@ -239,68 +240,76 @@ window.onload = () => {
       }, 10);
     }
 
+
     function handleAnswer(selected) {
-    if (answered) return;
-    answered = true;
-    clearInterval(timerInterval);
+        if (answered || gameEnded) return;
+        answered = true;
+        clearInterval(timerInterval);
 
-    const result = document.getElementById('result');
-    const ninja = document.getElementById('ninja');
-    const enemy = document.getElementById('enemy');
-    const ninjaPose = document.getElementById('ninja-pose');
+        const result = document.getElementById('result');
+        const ninja = document.getElementById('ninja');
+        const enemy = document.getElementById('enemy');
+        const poses = document.querySelectorAll('.ninja-pose');
 
-    const soundCorrect = document.getElementById('sound-correct');
-    const soundWrong = document.getElementById('sound-wrong');
+        const soundCorrect = document.getElementById('sound-correct');
+        const soundWrong = document.getElementById('sound-wrong');
 
-    ninja.style.display = 'none';
+        ninja.style.display = 'none';
 
-    if (selected === currentAnswer) {
-        result.textContent = "正解！忍者斬り成功！⚔️";
-        result.style.color = "lime";
-        score += 1;
+        // ランダムな決めポーズ画像選択
+        const randomIndex = Math.floor(Math.random() * poses.length);
+        const selectedPose = poses[randomIndex];
 
-        ninjaPose.style.display = 'block';
-        enemy.classList.add('defeat');
+        // すべて非表示にしてから、選ばれた1つを表示
+        poses.forEach(p => p.style.display = 'none');
 
-        // 正解音再生
-        soundCorrect.currentTime = 0;
-        soundCorrect.play();
+        if (selected === currentAnswer) {
+            result.textContent = "⚔️⚔️斬⚔️⚔️";
+            result.style.color = "yellow";
+            score += 1;
 
-        setTimeout(() => {
-        enemy.style.display = 'none';
-        enemy.classList.remove('defeat');
-        ninja.style.transition = 'none';
-        ninja.style.left = '-100px';
-        ninja.style.display = 'block';
-        ninjaPose.style.display = 'none';
-        generateQuestion();
-        }, 1600);
+            selectedPose.style.display = 'block';
+            enemy.classList.add('defeat');
 
-    } else {
-        result.textContent = "ミス！忍者失敗！💥";
-        result.style.color = "orange";
-        score = Math.max(0, score - 1);
+            soundCorrect.currentTime = 0;
+            soundCorrect.play();
 
-        showFailImage();
+            setTimeout(() => {
+            selectedPose.style.display = 'none';
+            enemy.style.display = 'none';
+            enemy.classList.remove('defeat');
+            ninja.style.transition = 'none';
+            ninja.style.left = '-100px';
+            ninja.style.display = 'block';
+            checkGameClear();
+            }, 1600);
 
-        ninja.style.transition = 'none';
-        ninja.style.left = '-100px';
+        } else {
+            result.textContent = "ミス！忍者失敗！💥";
+            result.style.color = "orange";
+            score = Math.max(0, score - 1);
+            wrongCount += 1;
 
-        ninjaPose.style.display = 'none';
+            showFailImage();
 
-        // 不正解音再生
-        soundWrong.currentTime = 0;
-        soundWrong.play();
+            soundWrong.currentTime = 0;
+            soundWrong.play();
 
-        setTimeout(() => {
-        ninja.style.display = 'block';
-        generateQuestion();
-        }, 2000);
+            ninja.style.transition = 'none';
+            ninja.style.left = '-100px';
+
+            setTimeout(() => {
+            ninja.style.display = 'block';
+            checkGameClear();
+            }, 2000);
+        }
+
+        document.getElementById('score').textContent = `スコア: ${score}`;
     }
 
-    document.getElementById('score').textContent = `スコア: ${score}`;
-    }
-    
+
+
+
     function showFailImage() {
       const failImage = document.getElementById('fail-image');
       failImage.style.display = 'block';
@@ -308,6 +317,22 @@ window.onload = () => {
         failImage.style.display = 'none';
       }, 1500);
     }
+
+    function checkGameClear() {
+        const clearImg = document.getElementById('clear-image');
+        const failClearImg = document.getElementById('fail-clear-image');
+
+        if (score >= 5) {
+            clearImg.style.display = 'block';
+            gameEnded = true;
+        } else if (wrongCount >= 3) {
+            failClearImg.style.display = 'block';
+            gameEnded = true;
+        } else {
+            generateQuestion(); // 条件を満たしてないなら次の問題へ
+        }
+    }
+
   </script>
 </body>
 </html>
