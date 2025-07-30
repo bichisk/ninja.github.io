@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ステージ選択</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: url('select_bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    h2 {
+      font-size: 2.5em;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .stage-button {
+      padding: 20px;
+      font-size: 18px;
+      background: #6ab04c;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .stage-button:hover {
+      background: #44bd32;
+    }
+
+    .stage-button.locked {
+      background: #bdc3c7;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .stage-button.locked::after {
+      content: "\1F512"; /* 鍵アイコン */
+      display: block;
+      font-size: 1.2em;
+      margin-top: 5px;
+    }
+
+    .zukan-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      background: #f39c12;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .zukan-button:hover {
+      background: #e67e22;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage-grid" id="stage-grid"></div>
+
+  <button class="zukan-button" onclick="location.href='otakara.html'">図鑑</button>
+
+  <script>
+    const maxStage = 10;
+    const clearedStages = JSON.parse(localStorage.getItem("clearedStage") || "[]");
+    const grid = document.getElementById("stage-grid");
+
+    for (let i = 1; i <= maxStage; i++) {
+      const btn = document.createElement("button");
+      btn.className = "stage-button";
+      btn.textContent = `ステージ ${i}`;
+
+      if (i === 1 || clearedStages.includes(i - 1)) {
+        btn.onclick = () => location.href = `stage${i}/ninja.html`;
+      } else {
+        btn.classList.add("locked");
+      }
+
+      grid.appendChild(btn);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>カード図鑑</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(to bottom, #fffbe6, #ffd966);
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #6b3e26;
+    }
+
+    .collection {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card-slot {
+      width: 90%;
+      max-width: 300px;
+      height: 180px;
+      border: 5px solid #c49a6c;
+      border-radius: 12px;
+      background: linear-gradient(to bottom right, #fffef6, #ffe3a3);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .card-slot img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+    }
+    .top-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      margin-top: 0;
+    }
+    .back-button {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      background: #ff9800;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background: #e68900;
+    }
+
+    @media (orientation: landscape) {
+      .collection {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>カード図鑑</h2>
+  <div class="collection" id="collection"></div>
+
+  <button class="back-button" onclick="goBack()">戻る</button>
+  <button class="back-button top-button" onclick="goBack()">戻る</button>
+
+  <script>
+    const totalCards = 50;
+    const owned = JSON.parse(localStorage.getItem("ownedCards") || "[]");
+
+    const collectionEl = document.getElementById("collection");
+
+    for (let i = 1; i <= totalCards; i++) {
+      const cardSlot = document.createElement("div");
+      cardSlot.className = "card-slot";
+
+      const cardName = `images/card/${Math.ceil(i)}.png`;
+      // const cardName = `images/card/${Math.ceil(i / 10)}_${(i % 10) || 10}.png`;
+      console.log(cardName);
+      const img = document.createElement("img");
+      if (owned.includes(cardName)) {
+        img.src = cardName;
+        img.alt = `カード${i}`;
+      } else {
+        img.src = "question.png";
+        img.alt = "未獲得";
+      }
+      cardSlot.appendChild(img);
+      collectionEl.appendChild(cardSlot);
+    }
+
+    function goBack() {
+      location.href = "select.html";
+    }
+  </script>
+</body>
+</html>
