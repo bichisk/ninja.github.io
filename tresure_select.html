@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>宝箱報酬</title>
-  <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -128,6 +127,9 @@
   </style>
 </head>
 <body>
+  <audio id="se-open" src="tresure_open.mp3" preload="auto"></audio>
+  <audio id="bgm" src="tresure_slect_bgm.mp3" preload="auto" loop></audio>
+
   <h2>宝箱を選んでください</h2>
   <div class="chest-container">
     <img src="box_closed.png" class="chest" data-index="0">
@@ -149,7 +151,7 @@
 
   const cardPools = {
     1: ['images/card/1.png', 'images/card/2.png', 'images/card/3.png'],
-    2: ['images/card/4.png', 'images/card/4.png', 'images/card/4.png'],
+    2: ['images/card/4.png', 'images/card/5.png', 'images/card/6.png'],
   };
 
   const selectedCards = cardPools[stage] || [];
@@ -193,6 +195,56 @@ document.querySelectorAll('.chest').forEach(chest => {
   function goToSelect() {
     location.href = "select.html";
   }
+
+
+  // 効果音とBGM
+const seOpen = document.getElementById("se-open");
+const bgm = document.getElementById("bgm");
+
+// ユーザーの操作後にBGM再生（自動再生制限対応）
+window.addEventListener("click", () => {
+  if (bgm.paused) {
+    bgm.volume = 0.5;  // 音量は調整可能
+    bgm.play().catch(e => console.log("BGM再生失敗:", e));
+  }
+}, { once: true });
+
+document.querySelectorAll('.chest').forEach(chest => {
+  chest.addEventListener('click', () => {
+    if (chestClicked) return;
+    chestClicked = true;
+
+    // 効果音再生
+    seOpen.currentTime = 0;
+    seOpen.play().catch(e => console.log("効果音再生失敗:", e));
+
+    const random = Math.floor(Math.random() * selectedCards.length);
+    const selectedCard = selectedCards[random];
+
+    // オーバーレイ表示
+    const overlay = document.getElementById("overlay-bg");
+    overlay.style.display = "block";
+
+    // カード表示
+    const display = document.getElementById("card-display");
+    const cardImg = document.getElementById("reward-card");
+
+    cardImg.src = selectedCard;
+    display.style.display = "block";
+    display.style.zIndex = "10";
+
+    // カード保存
+    let owned = JSON.parse(localStorage.getItem("ownedCards") || "[]");
+    if (!owned.includes(selectedCard)) {
+      owned.push(selectedCard);
+    }
+    localStorage.setItem("ownedCards", JSON.stringify(owned));
+
+    // カードをクリックすると select.html へ遷移
+    cardImg.addEventListener("click", goToSelect);
+  });
+});
+
 </script>
 </body>
 </html>
